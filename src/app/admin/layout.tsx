@@ -15,6 +15,7 @@ export default function AdminLayout({
         <NavLink href="/admin/products">Products</NavLink>
         <NavLink href="/admin/users">Customers</NavLink>
         <NavLink href="/admin/orders">Sales</NavLink>
+        <NavLink href="/admin/discount-codes">Coupons</NavLink>
       </Nav>
       <div className="container py-6">{children}</div>
     </>
