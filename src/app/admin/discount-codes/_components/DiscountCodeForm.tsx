@@ -3,12 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/formatters";
 import { useState } from "react";
-import { addProduct, updateProduct } from "../../_actions/products";
 import { useFormState, useFormStatus } from "react-dom";
-import Image from "next/image";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DiscountCodeType } from "@prisma/client";
 import { addDiscountCode } from "../../_actions/discountCodes";

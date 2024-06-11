@@ -1,8 +1,8 @@
 import db from "@/db/db";
-import PurchaseReceiptEmail from "@/email/PurchaseReceipt";
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import Stripe from "stripe";
+import { Resend } from "resend";
+import PurchaseReceiptEmail from "@/email/PurchaseReceipt";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -17,17 +17,18 @@ export async function POST(req: NextRequest) {
   if (event.type === "charge.succeeded") {
     const charge = event.data.object;
     const productId = charge.metadata.productId;
+    const discountCodeId = charge.metadata.discountCodeId;
     const email = charge.billing_details.email;
     const pricePaidInCents = charge.amount;
 
     const product = await db.product.findUnique({ where: { id: productId } });
     if (product == null || email == null) {
-      return new NextResponse("Bad request", { status: 400 });
+      return new NextResponse("Bad Request", { status: 400 });
     }
 
     const userFields = {
       email,
-      orders: { create: { productId, pricePaidInCents } },
+      orders: { create: { productId, pricePaidInCents, discountCodeId } },
     };
     const {
       orders: [order],
@@ -44,6 +45,13 @@ export async function POST(req: NextRequest) {
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
+
+    if (discountCodeId != null) {
+      await db.discountCode.update({
+        where: { id: discountCodeId },
+        data: { uses: { increment: 1 } },
+      });
+    }
 
     await resend.emails.send({
       from: `Support <${process.env.SENDER_EMAIL}>`,
